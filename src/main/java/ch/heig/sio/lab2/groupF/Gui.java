@@ -11,7 +11,10 @@ public final class Gui {
   public static void main(String[] args) {
     ObservableTspConstructiveHeuristic[] constructiveHeuristics = {
         new HeuristicComboItem.Constructive("Random tour", new RandomTour()),
-        // Add the constructive heuristics
+        new HeuristicComboItem.Constructive("Random Insert",new RandomInsert()),
+        new HeuristicComboItem.Constructive("Nearest Insert", new NearestInsert()),
+        new HeuristicComboItem.Constructive("Furthest Insert", new FurthestInsert()),
+
     };
 
     ObservableTspImprovementHeuristic[] improvementHeuristics = {
