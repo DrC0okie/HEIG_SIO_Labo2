@@ -18,7 +18,7 @@ public final class Gui {
     };
 
     ObservableTspImprovementHeuristic[] improvementHeuristics = {
-        // Add the new improvement heuristic
+        new TwoOptBestImprovement()
     };
 
     // May not work on all platforms, comment out if necessary
