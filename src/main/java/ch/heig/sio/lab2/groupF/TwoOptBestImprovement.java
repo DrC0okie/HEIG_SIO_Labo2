@@ -59,15 +59,13 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
      */
     private long calculateGain(int[] tour, int i, int j, TspTour initialTour) {
         int n = tour.length;
-        int prevI = tour[i];
-        int nextI = tour[(i + 1) % n];
-        int prevJ = tour[j];
+        int nextI = tour[i + 1];
         int nextJ = tour[(j + 1) % n];
 
-        return initialTour.data().getDistance(prevI, prevJ)
+        return initialTour.data().getDistance(tour[i], tour[j])
                 + initialTour.data().getDistance(nextI, nextJ)
-                - initialTour.data().getDistance(prevI, nextI)
-                - initialTour.data().getDistance(prevJ, nextJ);
+                - initialTour.data().getDistance(tour[i], nextI)
+                - initialTour.data().getDistance(tour[j], nextJ);
     }
 
     /**
