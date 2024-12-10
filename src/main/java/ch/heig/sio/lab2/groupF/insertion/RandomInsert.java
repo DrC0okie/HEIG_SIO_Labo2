@@ -1,4 +1,4 @@
-package ch.heig.sio.lab2.groupF;
+package ch.heig.sio.lab2.groupF.insertion;
 
 import java.util.*;
 

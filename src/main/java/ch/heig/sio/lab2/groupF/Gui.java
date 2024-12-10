@@ -4,6 +4,10 @@ import ch.heig.sio.lab2.display.HeuristicComboItem;
 import ch.heig.sio.lab2.display.ObservableTspConstructiveHeuristic;
 import ch.heig.sio.lab2.display.ObservableTspImprovementHeuristic;
 import ch.heig.sio.lab2.display.TspSolverGui;
+import ch.heig.sio.lab2.groupF.insertion.FurthestInsert;
+import ch.heig.sio.lab2.groupF.insertion.NearestInsert;
+import ch.heig.sio.lab2.groupF.insertion.RandomInsert;
+import ch.heig.sio.lab2.groupF.two_opt.TwoOptBestImprovement;
 import ch.heig.sio.lab2.tsp.RandomTour;
 import com.formdev.flatlaf.FlatLightLaf;
 

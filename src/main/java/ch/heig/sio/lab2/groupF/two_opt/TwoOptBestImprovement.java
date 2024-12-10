@@ -1,0 +1,53 @@
+package ch.heig.sio.lab2.groupF.two_opt;
+
+import ch.heig.sio.lab2.display.ObservableTspImprovementHeuristic;
+import ch.heig.sio.lab2.display.TspHeuristicObserver;
+import ch.heig.sio.lab2.tsp.TspTour;
+
+import static ch.heig.sio.lab2.groupF.two_opt.TwoOptUtils.*;
+
+public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic {
+
+    @Override
+    public TspTour computeTour(TspTour initialTour, TspHeuristicObserver observer) {
+        int[] tour = initialTour.tour().copy(); // Copie de la tournée initiale
+        int n = tour.length;
+        long currentLength = initialTour.length();
+        boolean hasImproved = true;
+
+        while (hasImproved) {
+            hasImproved = false;
+            long bestGain = 0;
+            int bestI = -1, bestJ = -1;
+
+            // Parcours des paires (i, j)
+            for (int i = 0; i < n - 1; i++) {
+                for (int j = i + 2; j < n; j++) {
+                    if (j == i + 1) continue;
+
+                    // Calcul du gain
+                    long gain = calculateGain(tour, i, j, initialTour.data());
+
+                    if (gain < bestGain) { // Chercher les réductions de longueur les plus grands
+                        bestGain = gain;
+                        bestI = i;
+                        bestJ = j;
+                    }
+                }
+            }
+
+            // Si une amélioration est trouvée
+            if (bestGain < 0) {
+                hasImproved = true;
+                // Appliquer le meilleur 2-échange
+                applyTwoOptSwap(tour, bestI + 1, bestJ);
+                currentLength += bestGain;
+
+                // Notifier l'observateur
+                observer.update(toEdges(tour));
+            }
+        }
+        // Retourner la nouvelle tournée
+        return new TspTour(initialTour.data(), tour, currentLength);
+    }
+}
