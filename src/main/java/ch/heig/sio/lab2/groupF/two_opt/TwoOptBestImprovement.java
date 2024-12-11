@@ -11,6 +11,12 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
     @Override
     public TspTour computeTour(TspTour initialTour, TspHeuristicObserver observer) {
         int[] tour = initialTour.tour().copy(); // Copie de la tournée initiale
+
+        // Étendre le tableau pour gérer la circularité
+        int[] extendedTour = new int[tour.length + 1];
+        System.arraycopy(tour, 0, extendedTour, 0, tour.length);
+        extendedTour[tour.length] = tour[0]; // Ajouter la première ville à la fin
+
         int n = tour.length;
         long currentLength = initialTour.length();
         boolean hasImproved = true;
@@ -23,31 +29,31 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
             // Parcours des paires (i, j)
             for (int i = 0; i < n - 1; i++) {
                 for (int j = i + 2; j < n; j++) {
-                    if (j == i + 1) continue;
-
                     // Calcul du gain
-                    long gain = calculateGain(tour, i, j, initialTour.data());
+                    long gain = calculateGain(extendedTour, i, j, initialTour.data());
 
-                    if (gain < bestGain) { // Chercher les réductions de longueur les plus grands
+                    if (gain < bestGain) { // Chercher les réductions de longueur les plus grandes
                         bestGain = gain;
                         bestI = i;
                         bestJ = j;
                     }
                 }
             }
-
             // Si une amélioration est trouvée
             if (bestGain < 0) {
                 hasImproved = true;
                 // Appliquer le meilleur 2-échange
-                applyTwoOptSwap(tour, bestI + 1, bestJ);
+                applyTwoOptSwap(extendedTour, bestI + 1, bestJ);
                 currentLength += bestGain;
 
                 // Notifier l'observateur
-                observer.update(toEdges(tour));
+                observer.update(toEdges(extendedTour));
             }
         }
-        // Retourner la nouvelle tournée
-        return new TspTour(initialTour.data(), tour, currentLength);
+
+        // Créer le tableau final sans l'élément supplémentaire
+        int[] finalTour = new int[tour.length];
+        System.arraycopy(extendedTour, 0, finalTour, 0, tour.length);
+        return new TspTour(initialTour.data(), finalTour, currentLength);
     }
 }

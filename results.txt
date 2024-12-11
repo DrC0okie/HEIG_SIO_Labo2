@@ -1,0 +1,86 @@
+Dataset: pcb442, Optimal: 50778
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  53916 |  56286.34 |  58183 |          10.85% |    484.16 ms
+NearestInsert   |  55848 |  55848.00 |  55848 |           9.98% |     91.98 ms
+FurthestInsert  |  57385 |  57385.00 |  57385 |          13.01% |     39.60 ms
+
+Dataset: att532, Optimal: 86729
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  92118 |  94511.28 |  96892 |           8.97% |    908.28 ms
+NearestInsert   |  98034 |  98034.00 |  98034 |          13.03% |    176.00 ms
+FurthestInsert  |  93352 |  93352.00 |  93352 |           7.64% |     47.50 ms
+
+Dataset: u574, Optimal: 36905
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  39553 |  40427.76 |  41666 |           9.55% |   1345.24 ms
+NearestInsert   |  40853 |  40853.00 |  40853 |          10.70% |    220.94 ms
+FurthestInsert  |  40218 |  40218.00 |  40218 |           8.98% |     43.66 ms
+
+Dataset: pcb1173, Optimal: 56892
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  62749 |  64061.24 |  65441 |          12.60% |  15807.92 ms
+NearestInsert   |  63143 |  63143.00 |  63143 |          10.99% |   2083.50 ms
+FurthestInsert  |  64644 |  64644.00 |  64644 |          13.63% |    558.26 ms
+
+Dataset: nrw1379, Optimal: 56638
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  61803 |  62862.10 |  63610 |          10.99% |  27965.86 ms
+NearestInsert   |  64030 |  64030.00 |  64030 |          13.05% |   3685.66 ms
+FurthestInsert  |  62305 |  62305.00 |  62305 |          10.01% |    701.56 ms
+
+Dataset: u1817, Optimal: 57201
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  64636 |  65967.98 |  67866 |          15.33% |  81571.10 ms
+NearestInsert   |  64002 |  64002.00 |  64002 |          11.89% |   6307.64 ms
+FurthestInsert  |  67299 |  67299.00 |  67299 |          17.65% |   2452.24 ms
+
+Environs 5 minutes
+
+
+Dataset: pcb442, Optimal: 50778
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  53916 |  56335.48 |  58183 |          10.94% |    614.06 ms
+NearestInsert   |  55848 |  55848.00 |  55848 |           9.98% |     60.32 ms
+FurthestInsert  |  57385 |  57385.00 |  57385 |          13.01% |     30.14 ms
+
+Dataset: att532, Optimal: 86729
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  92118 |  94635.68 |  96879 |           9.12% |    723.72 ms
+NearestInsert   |  98034 |  98034.00 |  98034 |          13.03% |    124.64 ms
+FurthestInsert  |  93352 |  93352.00 |  93352 |           7.64% |     34.04 ms
+
+Dataset: u574, Optimal: 36905
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  39553 |  40454.94 |  41666 |           9.62% |   1036.10 ms
+NearestInsert   |  40853 |  40853.00 |  40853 |          10.70% |    192.10 ms
+FurthestInsert  |  40218 |  40218.00 |  40218 |           8.98% |     38.36 ms
+
+Dataset: pcb1173, Optimal: 56892
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  62932 |  64113.68 |  65441 |          12.69% |  14329.82 ms
+NearestInsert   |  63143 |  63143.00 |  63143 |          10.99% |   1580.96 ms
+FurthestInsert  |  64644 |  64644.00 |  64644 |          13.63% |    389.90 ms
+
+Dataset: nrw1379, Optimal: 56638
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  61803 |  62858.28 |  63610 |          10.98% |  26878.74 ms
+NearestInsert   |  64030 |  64030.00 |  64030 |          13.05% |   2858.74 ms
+FurthestInsert  |  62305 |  62305.00 |  62305 |          10.01% |    616.48 ms
+
+Dataset: u1817, Optimal: 57201
+Heuristic       | Min      | Avg      | Max      | Avg Rel. Error  | Avg Time
+-----------------------------------------------------------------------
+RandomTour      |  64636 |  65952.44 |  67866 |          15.30% |  71860.20 ms
+NearestInsert   |  64002 |  64002.00 |  64002 |          11.89% |   4555.58 ms
+FurthestInsert  |  67299 |  67299.00 |  67299 |          17.65% |   1725.58 ms

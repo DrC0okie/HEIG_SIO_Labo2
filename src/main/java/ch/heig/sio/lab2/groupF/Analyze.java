@@ -12,8 +12,14 @@ import ch.heig.sio.lab2.tsp.TspTour;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.IntStream;
 
 public final class Analyze {
+
     public static void main(String[] args) {
         // Longueurs optimales pour chaque jeu de données
         Map<String, Long> optimalLengths = Map.of(
@@ -29,10 +35,16 @@ public final class Analyze {
         String[] datasets = {"pcb442", "att532", "u574", "pcb1173", "nrw1379", "u1817"};
 
         // Heuristiques
-        RandomTour randomTour = new RandomTour(0x134DAE9L);
-        NearestInsert nearestInsert = new NearestInsert();
-        FurthestInsert furthestInsert = new FurthestInsert();
+        List<TspConstructiveHeuristic> heuristics = List.of(
+                new RandomTour(0x134DAE9),
+                new NearestInsert(),
+                new FurthestInsert()
+        );
+        List<String> heuristicNames = List.of("RandomTour", "NearestInsert", "FurthestInsert");
+
         TwoOptBestImprovement twoOpt = new TwoOptBestImprovement();
+
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         for (String dataset : datasets) {
             TspData data;
@@ -45,24 +57,37 @@ public final class Analyze {
 
             long optimalLength = optimalLengths.get(dataset);
 
-            // Stockage des statistiques pour ce dataset
+            // Lancer les tests pour chaque heuristique en parallèle
+            List<Future<Statistics>> futureStats = new ArrayList<>();
+            for (int i = 0; i < heuristics.size(); i++) {
+                final int index = i; // Capture de la variable pour les threads
+                futureStats.add(executor.submit(() ->
+                        runTests(heuristicNames.get(index), data, heuristics.get(index), twoOpt, optimalLength)
+                ));
+            }
+
+            // Collecte des résultats pour ce dataset
             List<Statistics> datasetStats = new ArrayList<>();
+            for (Future<Statistics> future : futureStats) {
+                try {
+                    datasetStats.add(future.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    System.err.println("Error while processing heuristic: " + e.getMessage());
+                }
+            }
 
-            // Exécution pour chaque heuristique
-            datasetStats.add(runTests("RandomTour", data, randomTour, twoOpt, optimalLength));
-            datasetStats.add(runTests("NearestInsert", data, nearestInsert, twoOpt, optimalLength));
-            datasetStats.add(runTests("FurthestInsert", data, furthestInsert, twoOpt, optimalLength));
-
-            // Afficher les statistiques pour ce dataset
+            // Afficher les résultats pour ce dataset
             printStatisticsForDataset(dataset, optimalLength, datasetStats);
         }
+
+        executor.shutdown();
     }
 
     private static Statistics runTests(String heuristicName, TspData data, TspConstructiveHeuristic initialHeuristic,
                                        TwoOptBestImprovement twoOpt, long optimalLength) {
-        Statistics stats = new Statistics(heuristicName, data.getNumberOfCities(), optimalLength);
+        Statistics stats = new Statistics(heuristicName, optimalLength);
 
-        for (int i = 0; i < 50; i++) {
+        IntStream.range(0, 50).parallel().forEach(i -> {
             long startTime = System.nanoTime();
 
             // Génération de la tournée initiale
@@ -75,8 +100,10 @@ public final class Analyze {
             long executionTime = (endTime - startTime) / 1_000_000; // Convertir en ms
 
             // Enregistrer les statistiques
-            stats.addMeasurement(optimizedTour.length(), executionTime);
-        }
+            synchronized (stats) { // Assurer la sécurité des threads
+                stats.addMeasurement(optimizedTour.length(), executionTime);
+            }
+        });
 
         return stats;
     }
@@ -87,14 +114,10 @@ public final class Analyze {
                 "Heuristic", "Min", "Avg", "Max", "Avg Rel. Error", "Avg Time");
         System.out.println("-----------------------------------------------------------------------");
         for (Statistics stats : datasetStats) {
-            System.out.printf("%-15s | %-8d | %-8.2f | %-8d | %-15.2f%% | %-10.2f ms\n",
-                    stats.getHeuristicName(),
-                    stats.getMinLength(),
-                    stats.getAverageLength(),
-                    stats.getMaxLength(),
-                    stats.getAverageRelativeError(),
-                    stats.getAverageExecutionTime());
+            System.out.println(stats.toCompactString());
         }
         System.out.println();
     }
 }
+
+
