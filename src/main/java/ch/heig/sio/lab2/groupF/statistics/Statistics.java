@@ -1,77 +1,63 @@
 package ch.heig.sio.lab2.groupF.statistics;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import ch.heig.sio.lab2.tsp.TspTour;
+import java.util.*;
 
-/**
- * Classe pour gérer les statistiques sur les longueurs de tournées et les temps d'exécution.
- */
 public class Statistics {
     private final String heuristicName;
     private final long optimalLength;
-    private final List<Long> tourLengths;
-    private final List<Long> executionTimes;
+
+    private final List<Long> initialLengths = new ArrayList<>();
+    private final List<Long> improvedLengths = new ArrayList<>();
+    private final List<Long> times = new ArrayList<>();
+
+    private SummaryStatistics initialStats;
+    private SummaryStatistics improvedStats;
+
+    private double avgTimeMs;
 
     public Statistics(String heuristicName, long optimalLength) {
         this.heuristicName = heuristicName;
         this.optimalLength = optimalLength;
-        this.tourLengths = new ArrayList<>();
-        this.executionTimes = new ArrayList<>();
     }
 
-    /**
-     * Ajoute une mesure de longueur et de temps d'exécution.
-     *
-     * @param tourLength     Longueur de la tournée.
-     * @param executionTime  Temps d'exécution en millisecondes.
-     */
-    public void addMeasurement(long tourLength, long executionTime) {
-        tourLengths.add(tourLength);
-        executionTimes.add(executionTime);
+    public void addInitialLength(long length) {
+        initialLengths.add(length);
     }
 
-    /**
-     * Retourne la longueur minimale des tournées.
-     */
-    public long getMinLength() {
-        return tourLengths.stream().min(Long::compare).orElse(0L);
+    public void addImprovedLength(long length) {
+        improvedLengths.add(length);
     }
 
-    /**
-     * Retourne la longueur maximale des tournées.
-     */
-    public long getMaxLength() {
-        return tourLengths.stream().max(Long::compare).orElse(0L);
+    public void addTime(long timeNano) {
+        times.add(timeNano);
     }
 
-    /**
-     * Retourne la longueur moyenne des tournées.
-     */
-    public double getAverageLength() {
-        return tourLengths.stream().mapToLong(Long::longValue).average().orElse(0.0);
+    public void computeStatistics() {
+        initialStats = SummaryStatistics.calculate(initialLengths, optimalLength);
+        improvedStats = SummaryStatistics.calculate(improvedLengths, optimalLength);
+        avgTimeMs = times.stream().mapToLong(Long::longValue).average().orElse(0.0) / 1_000_000.0;
     }
 
-    /**
-     * Retourne le temps moyen d'exécution.
-     */
-    public double getAverageExecutionTime() {
-        return executionTimes.stream().mapToLong(Long::longValue).average().orElse(0.0);
+    public void print() {
+
+        System.out.printf("%-18s | %-9s | %s%n", heuristicName, "Initial", initialStats);
+        System.out.printf("%-18s | %-9s | %s%n", "", "Optimized", improvedStats);
+        System.out.printf("2-opt avg compute time: %.0f ms%n%n", avgTimeMs);
     }
 
-    /**
-     * Retourne le pourcentage d'écart moyen par rapport à la longueur optimale.
-     */
-    public double getAverageRelativeError() {
-        return (getAverageLength() - optimalLength) / (double) optimalLength * 100;
+    public static void printStatisticsTable(List<Statistics> allStats) {
+        System.out.printf("%-18s | %-9s | %17s | %17s | %17s | %6s%n",
+                "Heuristic", "Status", "Min", "Avg", "Max", "Median");
+        System.out.println("-".repeat(99));
+
+        allStats.forEach(stat -> {
+            stat.computeStatistics();
+            stat.print();
+        });
     }
 
-    /**
-     * Retourne un format compact des statistiques pour affichage dans un tableau.
-     */
-    public String toCompactString() {
-        return String.format("%-15s | %6d | %9.2f | %6d | %14.2f%% | %9.2f ms",
-                heuristicName, getMinLength(), getAverageLength(), getMaxLength(),
-                getAverageRelativeError(), getAverageExecutionTime());
+    public static int[] getFirstNCities(TspTour tour, int n) {
+        return tour.tour().stream().limit(n).toArray();
     }
 }

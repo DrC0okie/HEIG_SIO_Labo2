@@ -2,122 +2,75 @@ package ch.heig.sio.lab2.groupF;
 
 import ch.heig.sio.lab2.groupF.insertion.FurthestInsert;
 import ch.heig.sio.lab2.groupF.insertion.NearestInsert;
-import ch.heig.sio.lab2.groupF.statistics.Statistics;
 import ch.heig.sio.lab2.groupF.two_opt.TwoOptBestImprovement;
-import ch.heig.sio.lab2.tsp.RandomTour;
-import ch.heig.sio.lab2.tsp.TspConstructiveHeuristic;
-import ch.heig.sio.lab2.tsp.TspData;
-import ch.heig.sio.lab2.tsp.TspTour;
+import ch.heig.sio.lab2.tsp.*;
+import ch.heig.sio.lab2.groupF.statistics.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.stream.IntStream;
+import java.io.FileNotFoundException;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static ch.heig.sio.lab2.groupF.statistics.Statistics.*;
 
 public final class Analyze {
 
-    public static void main(String[] args) {
-        // Longueurs optimales pour chaque jeu de données
-        Map<String, Long> optimalLengths = Map.of(
-                "pcb442", 50778L,
-                "att532", 86729L,
-                "u574", 36905L,
-                "pcb1173", 56892L,
-                "nrw1379", 56638L,
-                "u1817", 57201L
+    private static final long SEED = 0x134DAE9;
+    private static final int TRIALS = 50;
+
+    /**
+     * Represents a TSP data set with its name, file path, and optimal length.
+     */
+    private record DataSet(String name, String filePath, long optimalLength) {}
+
+    /**
+     * Main entry point of the Analyze application.
+     *
+     * @param args Command-line arguments (not used).
+     * @throws FileNotFoundException if a dataset file cannot be found
+     */
+    public static void main(String[] args) throws FileNotFoundException {
+        //TODO To delete
+        long startTime = System.nanoTime();
+
+
+        // List of data sets to analyze with their optimal lengths
+        List<DataSet> dataSets = Arrays.asList(
+                new DataSet("pcb442", "data/pcb442.dat", 50778),
+                new DataSet("att532", "data/att532.dat", 86729),
+                new DataSet("u574", "data/u574.dat", 36905),
+                new DataSet("pcb1173", "data/pcb1173.dat", 56892),
+                new DataSet("nrw1379", "data/nrw1379.dat", 56638),
+                new DataSet("u1817", "data/u1817.dat", 57201)
         );
 
-        // Jeux de données
-        String[] datasets = {"pcb442", "att532", "u574", "pcb1173", "nrw1379", "u1817"};
+        TspImprovementHeuristic twoOpt = new TwoOptBestImprovement();
 
-        // Heuristiques
-        List<TspConstructiveHeuristic> heuristics = List.of(
-                new RandomTour(0x134DAE9),
-                new NearestInsert(),
-                new FurthestInsert()
-        );
-        List<String> heuristicNames = List.of("RandomTour", "NearestInsert", "FurthestInsert");
+        for (DataSet ds : dataSets) {
+            System.out.println("Dataset: " + ds.name() + ", Optimal length: " + ds.optimalLength());
 
-        TwoOptBestImprovement twoOpt = new TwoOptBestImprovement();
+            TspData data = TspData.fromFile(ds.filePath());
 
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            int[] startCities = getFirstNCities(new RandomTour(SEED).computeTour(data, 0), TRIALS);
 
-        for (String dataset : datasets) {
-            TspData data;
-            try {
-                data = TspData.fromFile("data/" + dataset + ".dat");
-            } catch (Exception e) {
-                System.err.println("File \"" + dataset + "\" not found");
-                continue;
-            }
+            // Define strategies (heuristics)
+            List<EvaluationStrategy> strategies = List.of(
+                    new RandomTourEvaluation(new RandomTour(SEED)),
+                    new InsertionHeuristicEvaluation(new NearestInsert(), startCities, "Nearest insertion"),
+                    new InsertionHeuristicEvaluation(new FurthestInsert(), startCities, "Furthest insertion")
+            );
 
-            long optimalLength = optimalLengths.get(dataset);
+            // Thread-safe list to collect statistics
+            List<Statistics> statistics = new CopyOnWriteArrayList<>();
 
-            // Lancer les tests pour chaque heuristique en parallèle
-            List<Future<Statistics>> futureStats = new ArrayList<>();
-            for (int i = 0; i < heuristics.size(); i++) {
-                final int index = i; // Capture de la variable pour les threads
-                futureStats.add(executor.submit(() ->
-                        runTests(heuristicNames.get(index), data, heuristics.get(index), twoOpt, optimalLength)
-                ));
-            }
+            // Parallelize strategy evaluation
+            strategies.parallelStream().forEach(strategy -> {
+                Statistics stat = strategy.evaluate(data, twoOpt, ds.optimalLength(), TRIALS);
+                statistics.add(stat);
+            });
 
-            // Collecte des résultats pour ce dataset
-            List<Statistics> datasetStats = new ArrayList<>();
-            for (Future<Statistics> future : futureStats) {
-                try {
-                    datasetStats.add(future.get());
-                } catch (InterruptedException | ExecutionException e) {
-                    System.err.println("Error while processing heuristic: " + e.getMessage());
-                }
-            }
-
-            // Afficher les résultats pour ce dataset
-            printStatisticsForDataset(dataset, optimalLength, datasetStats);
+            printStatisticsTable(statistics);
+            System.out.println();
         }
-
-        executor.shutdown();
-    }
-
-    private static Statistics runTests(String heuristicName, TspData data, TspConstructiveHeuristic initialHeuristic,
-                                       TwoOptBestImprovement twoOpt, long optimalLength) {
-        Statistics stats = new Statistics(heuristicName, optimalLength);
-
-        IntStream.range(0, 50).parallel().forEach(i -> {
-            long startTime = System.nanoTime();
-
-            // Génération de la tournée initiale
-            TspTour initialTour = initialHeuristic.computeTour(data, 0);
-
-            // Application de 2-opt
-            TspTour optimizedTour = twoOpt.computeTour(initialTour);
-
-            long endTime = System.nanoTime();
-            long executionTime = (endTime - startTime) / 1_000_000; // Convertir en ms
-
-            // Enregistrer les statistiques
-            synchronized (stats) { // Assurer la sécurité des threads
-                stats.addMeasurement(optimizedTour.length(), executionTime);
-            }
-        });
-
-        return stats;
-    }
-
-    private static void printStatisticsForDataset(String dataset, long optimalLength, List<Statistics> datasetStats) {
-        System.out.printf("Dataset: %s, Optimal: %d\n", dataset, optimalLength);
-        System.out.printf("%-15s | %-8s | %-8s | %-8s | %-15s | %-10s\n",
-                "Heuristic", "Min", "Avg", "Max", "Avg Rel. Error", "Avg Time");
-        System.out.println("-----------------------------------------------------------------------");
-        for (Statistics stats : datasetStats) {
-            System.out.println(stats.toCompactString());
-        }
-        System.out.println();
+        
     }
 }
-
-
