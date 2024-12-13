@@ -11,6 +11,11 @@ import java.util.NoSuchElementException;
 
 import static ch.heig.sio.lab2.groupF.two_opt.TwoOptUtils.*;
 
+/**
+ * Implémentation de l'algorithme 2-opt avec meilleure amélioration (Best Improvement).
+ * Cette classe permet d'améliorer une tournée initiale pour le TSP en échangeant deux arêtes à chaque itération,
+ * en cherchant toujours l'amélioration maximale.
+ */
 public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic {
 
     @Override
@@ -32,20 +37,20 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
             long bestGain = 0;
             int bestI = -1, bestJ = -1;
 
-            // Parcours des paires (i, j)
+            // Parcours des paires (i, j) pour trouver la meilleure amélioration
             for (int i = 0; i < n - 1; i++) {
                 for (int j = i + 2; j < n; j++) {
-                    // Calcul du gain
+                    // Calcul du gain pour le 2-échange
                     long gain = calculateGain(extendedTour, i, j, data);
 
-                    if (gain < bestGain) { // Chercher les réductions de longueur les plus grandes
+                    if (gain < bestGain) { // Rechercher la meilleure réduction de longueur
                         bestGain = gain;
                         bestI = i;
                         bestJ = j;
                     }
                 }
             }
-            // Si une amélioration est trouvée
+            // Si une amélioration est trouvée, appliquer le meilleur 2-échange
             if (bestGain < 0) {
                 hasImproved = true;
                 // Appliquer le meilleur 2-échange
@@ -64,7 +69,7 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
     }
 
     /**
-     * A private static inner class to lazily iterate over edges of the extended tour.
+     * Itérateur sur les arêtes de la tournée (lazy).
      */
     private static class EdgeIterator implements Iterator<Edge> {
         private final int[] extendedTour;
@@ -72,14 +77,13 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
         private final int edgeCount;
 
         /**
-         * Constructs an EdgeIterator for a given tour.
-         *
-         * @param extendedTour The extended tour array (circular).
+         * Constructeur de l'itérateur.
+         * @param extendedTour Le tableau étendu (circulaire) représentant la tournée.
          */
         public EdgeIterator(int[] extendedTour) {
             this.extendedTour = extendedTour;
             this.currentIndex = 0;
-            this.edgeCount = extendedTour.length - 1; // Exclude the duplicate closing city
+            this.edgeCount = extendedTour.length - 1; // Exclut la ville dupliquée à la fin
         }
 
         @Override

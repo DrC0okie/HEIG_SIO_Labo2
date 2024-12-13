@@ -33,16 +33,4 @@ final class TwoOptUtils {
             --j;
         }
     }
-
-    /**
-     * Convertit la tournée en un tableau d'arêtes pour l'observateur.
-     */
-    static Iterator<Edge> toEdges(int[] extendedTour) {
-        List<Edge> edges = new ArrayList<>();
-        int n = extendedTour.length - 1; // Exclure l'élément ajouté
-        for (int i = 0; i < n; i++) {
-            edges.add(new Edge(extendedTour[i], extendedTour[i + 1]));
-        }
-        return edges.iterator();
-    }
 }
