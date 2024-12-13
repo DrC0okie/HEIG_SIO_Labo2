@@ -56,8 +56,4 @@ public class Statistics {
             stat.print();
         });
     }
-
-    public static int[] getFirstNCities(TspTour tour, int n) {
-        return tour.tour().stream().limit(n).toArray();
-    }
 }
