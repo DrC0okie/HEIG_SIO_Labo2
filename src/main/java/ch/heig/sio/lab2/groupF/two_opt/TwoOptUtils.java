@@ -2,7 +2,6 @@ package ch.heig.sio.lab2.groupF.two_opt;
 
 import ch.heig.sio.lab2.tsp.Edge;
 import ch.heig.sio.lab2.tsp.TspData;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

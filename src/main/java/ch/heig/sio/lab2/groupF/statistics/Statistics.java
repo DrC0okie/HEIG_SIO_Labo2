@@ -43,12 +43,12 @@ public class Statistics {
 
         System.out.printf("%-18s | %-9s | %s%n", heuristicName, "Initial", initialStats);
         System.out.printf("%-18s | %-9s | %s%n", "", "Optimized", improvedStats);
-        System.out.printf("2-opt avg compute time: %.0f ms%n%n", avgTimeMs);
+        System.out.printf("Avg compute time: %.0f ms%n%n", avgTimeMs);
     }
 
     public static void printStatisticsTable(List<Statistics> allStats) {
         System.out.printf("%-18s | %-9s | %17s | %17s | %17s | %6s%n",
-                "Heuristic", "Status", "Min", "Avg", "Max", "Median");
+                "Heuristic", "Status", "Min length", "Avg length", "Max length", "Median length");
         System.out.println("-".repeat(99));
 
         allStats.forEach(stat -> {
