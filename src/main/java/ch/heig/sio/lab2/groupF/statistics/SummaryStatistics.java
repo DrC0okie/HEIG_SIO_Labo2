@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author Jarod Streckeisen, Timothée Van Hove
  */
-public class SummaryStatistics {
+public final class SummaryStatistics {
     private final long min, max;
     private final double avg, median, relativeErrorMin, relativeErrorAvg, relativeErrorMax;
 

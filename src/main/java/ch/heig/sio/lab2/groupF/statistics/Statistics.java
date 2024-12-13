@@ -11,7 +11,7 @@ import java.util.*;
  *
  * @author Jarod Streckeisen, Timothée Van Hove
  */
-public class Statistics {
+public final class Statistics {
     private final String heuristicName;
     private final long optimalLength;
     private final List<Long> initialLengths = new ArrayList<>();

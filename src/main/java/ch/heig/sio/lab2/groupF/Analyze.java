@@ -50,21 +50,22 @@ public final class Analyze {
 
         // Analyser chaque ensemble de données
         for (DataSet ds : dataSets) {
-            System.out.println("Heuristic comparison for file: " + ds.name() + ", Optimal length: " + ds.optimalLength());
+            long optLength = ds.optimalLength();
+            System.out.println("Heuristic comparison for file: " + ds.name() + ".dat, Optimal length: " + optLength);
 
             TspData data = TspData.fromFile(ds.filePath());
 
             // Générer une liste de villes de départ pour les heuristiques d'insertion
-            int[] startCities = getFirstNCities(new RandomTour(SEED).computeTour(data, 0), TRIALS);
+            int[] startCities = new RandomTour(SEED).computeTour(data, 0).tour().stream().limit(TRIALS).toArray();
 
             // Évaluer chaque heuristique
-            List<Statistics> statistics = new ArrayList<>();
-            statistics.add(evaluateHeuristic("Random Tour", data, new RandomTour(SEED), null, twoOpt, ds.optimalLength()));
-            statistics.add(evaluateHeuristic("Nearest Insertion", data, new NearestInsert(), startCities, twoOpt, ds.optimalLength()));
-            statistics.add(evaluateHeuristic("Furthest Insertion", data, new FurthestInsert(), startCities, twoOpt, ds.optimalLength()));
+            List<Statistics> stats = new ArrayList<>();
+            stats.add(evaluateHeuristic("Random Tour", new RandomTour(SEED), twoOpt, data, null, optLength));
+            stats.add(evaluateHeuristic("Nearest Insertion", new NearestInsert(), twoOpt, data, startCities, optLength));
+            stats.add(evaluateHeuristic("Furthest Insertion", new FurthestInsert(), twoOpt, data, startCities, optLength));
 
             // Afficher les résultats des statistiques collectées
-            printStatisticsTable(statistics);
+            printStatisticsTable(stats);
             System.out.println();
         }
     }
@@ -82,10 +83,10 @@ public final class Analyze {
      */
     private static Statistics evaluateHeuristic(
             String heuristicName,
-            TspData data,
             TspConstructiveHeuristic heuristic,
-            int[] startCities,
             TspImprovementHeuristic improvement,
+            TspData data,
+            int[] startCities,
             long optimalLength) {
 
         Statistics stats = new Statistics(heuristicName, optimalLength);
@@ -126,16 +127,5 @@ public final class Analyze {
         executor.shutdown();
 
         return stats;
-    }
-
-    /**
-     * Génère un tableau des premières villes d'une tournée.
-     *
-     * @param tour La tournée initiale.
-     * @param n    Le nombre de villes à extraire.
-     * @return Un tableau des identifiants des villes.
-     */
-    public static int[] getFirstNCities(TspTour tour, int n) {
-        return tour.tour().stream().limit(n).toArray();
     }
 }

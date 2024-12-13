@@ -18,7 +18,7 @@ import static ch.heig.sio.lab2.groupF.two_opt.TwoOptUtils.*;
  *
  * @author Jarod Streckeisen, Timothée Van Hove
  */
-public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic {
+public final class TwoOptBestImprovement implements ObservableTspImprovementHeuristic {
 
     /**
      * Applique l'algorithme 2-opt avec meilleure amélioration pour optimiser une tournée initiale.
