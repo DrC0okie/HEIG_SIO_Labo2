@@ -11,17 +11,6 @@ final class TwoOptUtils {
     }
 
     /**
-     * Calcule le gain d'un 2-échange (i, j).
-     */
-    static long calculateGain(int[] extendedTour, int i, int j, TspData data) {
-        int nextI = extendedTour[i + 1];
-        int nextJ = extendedTour[j + 1];
-        int removedDistance = data.getDistance(extendedTour[i], extendedTour[j]) + data.getDistance(nextI, nextJ);
-        int addedDistance = data.getDistance(extendedTour[i], nextI) + data.getDistance(extendedTour[j], nextJ);
-        return removedDistance - addedDistance;
-    }
-
-    /**
      * Applique un 2-échange en inversant la sous-séquence de `tour`.
      */
     static void applyTwoOptSwap(int[] extendedTour, int i, int j) {
@@ -32,17 +21,5 @@ final class TwoOptUtils {
             ++i;
             --j;
         }
-    }
-
-    /**
-     * Convertit la tournée en un tableau d'arêtes pour l'observateur.
-     */
-    static Iterator<Edge> toEdges(int[] extendedTour) {
-        List<Edge> edges = new ArrayList<>();
-        int n = extendedTour.length - 1; // Exclure l'élément ajouté
-        for (int i = 0; i < n; i++) {
-            edges.add(new Edge(extendedTour[i], extendedTour[i + 1]));
-        }
-        return edges.iterator();
     }
 }

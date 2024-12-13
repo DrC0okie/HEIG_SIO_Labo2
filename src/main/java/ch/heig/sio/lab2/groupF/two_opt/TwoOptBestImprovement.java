@@ -11,12 +11,20 @@ import java.util.NoSuchElementException;
 
 import static ch.heig.sio.lab2.groupF.two_opt.TwoOptUtils.*;
 
+/**
+ * Implémentation de l'algorithme 2-opt avec meilleure amélioration (Best Improvement).
+ * Cette classe permet d'améliorer une tournée initiale pour le TSP en échangeant deux arêtes à chaque itération,
+ * en cherchant toujours l'amélioration maximale.
+ */
 public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic {
 
     @Override
     public TspTour computeTour(TspTour initialTour, TspHeuristicObserver observer) {
         int[] tour = initialTour.tour().copy(); // Copie de la tournée initiale
         final TspData data = initialTour.data();
+
+        // Pré-calculer la matrice de distances pour accélérer les accès
+        int[][] distanceMatrix = precomputeDistanceMatrix(data);
 
         // Étendre le tableau pour gérer la circularité
         int[] extendedTour = new int[tour.length + 1];
@@ -32,23 +40,22 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
             long bestGain = 0;
             int bestI = -1, bestJ = -1;
 
-            // Parcours des paires (i, j)
+            // Parcours des paires (i, j) pour trouver la meilleure amélioration
             for (int i = 0; i < n - 1; i++) {
                 for (int j = i + 2; j < n; j++) {
-                    // Calcul du gain
-                    long gain = calculateGain(extendedTour, i, j, data);
+                    // Calcul du gain pour le 2-échange
+                    long gain = calculateGain(extendedTour, i, j, distanceMatrix);
 
-                    if (gain < bestGain) { // Chercher les réductions de longueur les plus grandes
+                    if (gain < bestGain) { // Rechercher la meilleure réduction de longueur
                         bestGain = gain;
                         bestI = i;
                         bestJ = j;
                     }
                 }
             }
-            // Si une amélioration est trouvée
+            // Si une amélioration est trouvée, appliquer le meilleur 2-échange
             if (bestGain < 0) {
                 hasImproved = true;
-                // Appliquer le meilleur 2-échange
                 applyTwoOptSwap(extendedTour, bestI + 1, bestJ);
                 currentLength += bestGain;
 
@@ -61,6 +68,43 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
         int[] finalTour = new int[tour.length];
         System.arraycopy(extendedTour, 0, finalTour, 0, tour.length);
         return new TspTour(data, finalTour, currentLength);
+    }
+
+    /**
+     * Pré-calculer la matrice des distances pour accélérer les accès à distance.
+     *
+     * @param data Les données TSP contenant les informations sur les villes.
+     * @return Une matrice contenant les distances entre chaque paire de villes.
+     */
+    private static int[][] precomputeDistanceMatrix(TspData data) {
+        int n = data.getNumberOfCities();
+        int[][] distanceMatrix = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                distanceMatrix[i][j] = data.getDistance(i, j);
+            }
+        }
+        return distanceMatrix;
+    }
+
+    /**
+     * Calcule le gain d'un 2-échange (i, j) à l'aide de la matrice des distances.
+     *
+     * @param extendedTour Le tableau circulaire représentant la tournée.
+     * @param i L'indice de la première arête.
+     * @param j L'indice de la seconde arête.
+     * @param distanceMatrix La matrice des distances pré-calculées.
+     * @return Le gain de distance résultant de l'échange.
+     */
+    static long calculateGain(int[] extendedTour, int i, int j, int[][] distanceMatrix) {
+        int cityI = extendedTour[i];
+        int cityJ = extendedTour[j];
+        int nextI = extendedTour[i + 1];
+        int nextJ = extendedTour[j + 1];
+
+        int removedDistance = distanceMatrix[cityI][cityJ] + distanceMatrix[nextI][nextJ];
+        int addedDistance = distanceMatrix[cityI][nextI] + distanceMatrix[cityJ][nextJ];
+        return removedDistance - addedDistance;
     }
 
     /**
