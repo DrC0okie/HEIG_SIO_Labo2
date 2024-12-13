@@ -14,10 +14,19 @@ import static ch.heig.sio.lab2.groupF.two_opt.TwoOptUtils.*;
 /**
  * Implémentation de l'algorithme 2-opt avec meilleure amélioration (Best Improvement).
  * Cette classe permet d'améliorer une tournée initiale pour le TSP en échangeant deux arêtes à chaque itération,
- * en cherchant toujours l'amélioration maximale.
+ * en cherchant toujours l'amélioration maximale à chaque itération.
+ *
+ * @author Jarod Streckeisen, Timothée Van Hove
  */
 public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic {
 
+    /**
+     * Applique l'algorithme 2-opt avec meilleure amélioration pour optimiser une tournée initiale.
+     *
+     * @param initialTour La tournée initiale à optimiser.
+     * @param observer    Observateur des modifications de la tournée.
+     * @return Une tournée optimisée après application de 2-opt.
+     */
     @Override
     public TspTour computeTour(TspTour initialTour, TspHeuristicObserver observer) {
         int[] tour = initialTour.tour().copy(); // Copie de la tournée initiale
@@ -40,10 +49,10 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
             // Parcours des paires (i, j) pour trouver la meilleure amélioration
             for (int i = 0; i < n - 1; i++) {
                 for (int j = i + 2; j < n; j++) {
-                    // Calcul du gain pour le 2-échange
+                    // Calcul du gain potentiel pour le 2-échange
                     long gain = calculateGain(extendedTour, i, j, data);
 
-                    if (gain < bestGain) { // Rechercher la meilleure réduction de longueur
+                    if (gain < bestGain) {
                         bestGain = gain;
                         bestI = i;
                         bestJ = j;
@@ -53,23 +62,25 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
             // Si une amélioration est trouvée, appliquer le meilleur 2-échange
             if (bestGain < 0) {
                 hasImproved = true;
-                // Appliquer le meilleur 2-échange
                 applyTwoOptSwap(extendedTour, bestI + 1, bestJ);
+
+                // Mettre à jour la longueur actuelle
                 currentLength += bestGain;
 
-                // Notifier l'observateur
+                // Notifier l'observateur des modifications
                 observer.update(new EdgeIterator(extendedTour));
             }
         }
 
-        // Créer le tableau final sans l'élément supplémentaire
+        // Construire la tournée finale sans l'élément ajouté pour la circularité
         int[] finalTour = new int[tour.length];
         System.arraycopy(extendedTour, 0, finalTour, 0, tour.length);
         return new TspTour(data, finalTour, currentLength);
     }
 
     /**
-     * Itérateur sur les arêtes de la tournée (lazy).
+     * Itérateur sur les arêtes d'une tournée étendue.
+     * Permet une itération paresseuse (lazy) sur les arêtes définies par un tableau.
      */
     private static class EdgeIterator implements Iterator<Edge> {
         private final int[] extendedTour;
@@ -78,19 +89,31 @@ public class TwoOptBestImprovement implements ObservableTspImprovementHeuristic 
 
         /**
          * Constructeur de l'itérateur.
+         *
          * @param extendedTour Le tableau étendu (circulaire) représentant la tournée.
          */
         public EdgeIterator(int[] extendedTour) {
             this.extendedTour = extendedTour;
             this.currentIndex = 0;
-            this.edgeCount = extendedTour.length - 1; // Exclut la ville dupliquée à la fin
+            this.edgeCount = extendedTour.length - 1; // Ignore la ville dupliquée à la fin
         }
 
+        /**
+         * Vérifie s'il reste des arêtes à parcourir.
+         *
+         * @return true s'il reste des arêtes, sinon false.
+         */
         @Override
         public boolean hasNext() {
             return currentIndex < edgeCount;
         }
 
+        /**
+         * Retourne la prochaine arête de la tournée.
+         *
+         * @return Une instance d'Edge représentant l'arête courante.
+         * @throws NoSuchElementException Si aucune arête restante.
+         */
         @Override
         public Edge next() {
             if (!hasNext()) {

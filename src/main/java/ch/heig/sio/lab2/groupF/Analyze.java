@@ -9,6 +9,7 @@ import ch.heig.sio.lab2.tsp.*;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.*;
+
 import static ch.heig.sio.lab2.groupF.statistics.Statistics.*;
 
 /**
@@ -17,6 +18,8 @@ import static ch.heig.sio.lab2.groupF.statistics.Statistics.*;
  * - L'évaluation des heuristiques de construction de tournées initiales (aléatoires et insertion).
  * - L'amélioration des tournées avec 2-opt.
  * - L'utilisation de multithreading pour paralléliser les évaluations par essai.
+ *
+ * @author Jarod Streckeisen, Timothée Van Hove
  */
 public final class Analyze {
 
@@ -28,7 +31,8 @@ public final class Analyze {
      * Représente un ensemble de données TSP avec un nom, un chemin vers le fichier
      * contenant les données et la longueur optimale de la tournée.
      */
-    private record DataSet(String name, String filePath, long optimalLength) {}
+    private record DataSet(String name, String filePath, long optimalLength) {
+    }
 
     public static void main(String[] args) throws FileNotFoundException {
         // Définir les ensembles de données et leurs longueurs optimales
@@ -46,7 +50,7 @@ public final class Analyze {
 
         // Analyser chaque ensemble de données
         for (DataSet ds : dataSets) {
-            System.out.println("Dataset: " + ds.name() + ", Optimal length: " + ds.optimalLength());
+            System.out.println("Heuristic comparison for file: " + ds.name() + ", Optimal length: " + ds.optimalLength());
 
             TspData data = TspData.fromFile(ds.filePath());
 
@@ -69,10 +73,10 @@ public final class Analyze {
      * Évalue une heuristique donnée en utilisant un thread par essai.
      *
      * @param heuristicName Le nom de l'heuristique.
-     * @param data Les données du TSP.
-     * @param heuristic L'heuristique constructive utilisée pour construire des tournées initiales.
-     * @param startCities Les villes de départ pour les heuristiques d'insertion (null pour RandomTour).
-     * @param improvement L'heuristique d'amélioration (e.g., 2-opt).
+     * @param data          Les données du TSP.
+     * @param heuristic     L'heuristique constructive utilisée pour construire des tournées initiales.
+     * @param startCities   Les villes de départ pour les heuristiques d'insertion (null pour RandomTour).
+     * @param improvement   L'heuristique d'amélioration (e.g., 2-opt).
      * @param optimalLength La longueur optimale pour cet ensemble de données.
      * @return Les statistiques collectées pour cette heuristique.
      */
@@ -128,7 +132,7 @@ public final class Analyze {
      * Génère un tableau des premières villes d'une tournée.
      *
      * @param tour La tournée initiale.
-     * @param n Le nombre de villes à extraire.
+     * @param n    Le nombre de villes à extraire.
      * @return Un tableau des identifiants des villes.
      */
     public static int[] getFirstNCities(TspTour tour, int n) {
