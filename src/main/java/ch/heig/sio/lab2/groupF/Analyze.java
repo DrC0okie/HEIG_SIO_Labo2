@@ -31,29 +31,36 @@ public final class Analyze {
      * Représente un ensemble de données TSP avec un nom, un chemin vers le fichier
      * contenant les données et la longueur optimale de la tournée.
      */
-    private record DataSet(String name, String filePath, long optimalLength) {
+    private record DataSet(String name, String fileName, long optimalLength) {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
         // Définir les ensembles de données et leurs longueurs optimales
         List<DataSet> dataSets = Arrays.asList(
-                new DataSet("pcb442", "data/pcb442.dat", 50778),
-                new DataSet("att532", "data/att532.dat", 86729),
-                new DataSet("u574", "data/u574.dat", 36905),
-                new DataSet("pcb1173", "data/pcb1173.dat", 56892),
-                new DataSet("nrw1379", "data/nrw1379.dat", 56638),
-                new DataSet("u1817", "data/u1817.dat", 57201)
+                new DataSet("pcb442", "pcb442.dat", 50778),
+                new DataSet("att532", "att532.dat", 86729),
+                new DataSet("u574", "u574.dat", 36905),
+                new DataSet("pcb1173", "pcb1173.dat", 56892),
+                new DataSet("nrw1379", "nrw1379.dat", 56638),
+                new DataSet("u1817", "u1817.dat", 57201)
         );
 
         // Heuristique d'amélioration 2-opt
         TspImprovementHeuristic twoOpt = new TwoOptBestImprovement();
-
+        String directory = "data/";
+        TspData data;
         // Analyser chaque ensemble de données
         for (DataSet ds : dataSets) {
             long optLength = ds.optimalLength();
             System.out.println("Heuristic comparison for file: " + ds.name() + ".dat, Optimal length: " + optLength);
 
-            TspData data = TspData.fromFile(ds.filePath());
+            try {
+                data = TspData.fromFile(directory + ds.fileName());
+            } catch (FileNotFoundException e) {
+                throw new FileNotFoundException(
+                        "Couldn't find the file \"" + ds.fileName + "\" in the directory \""
+                        + directory.replace("/", "") + "\" ");
+            }
 
             // Générer une liste de villes de départ pour les heuristiques d'insertion
             int[] startCities = new RandomTour(SEED).computeTour(data, 0).tour().stream().limit(TRIALS).toArray();

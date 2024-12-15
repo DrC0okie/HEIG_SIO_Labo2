@@ -59,7 +59,7 @@ public final class Statistics {
     public void computeStatistics() {
         initialStats = SummaryStatistics.calculate(initialLengths, optimalLength);
         improvedStats = SummaryStatistics.calculate(improvedLengths, optimalLength);
-        avgTimeMs = times.stream().mapToLong(Long::longValue).average().orElse(0.0) / 1_000_000.0;
+        avgTimeMs = times.stream().mapToLong(Long::longValue).average().orElse(0.0) / 1000000.0;
     }
 
     /**

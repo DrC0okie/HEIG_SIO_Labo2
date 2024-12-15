@@ -49,9 +49,7 @@ public final class SummaryStatistics {
             return new SummaryStatistics(0, 0, 0, 0, 0, 0, 0);
         }
 
-        // Trier les longueurs pour calculer la médiane
         Collections.sort(values);
-
         long min = values.getFirst();
         long max = values.getLast();
         double avg = values.stream().mapToDouble(Long::doubleValue).average().orElse(0.0);
